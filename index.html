@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html>
+<!--Example using Mapbox GL Javascript to create 3D extruded buildings. Source: https://www.mapbox.com/mapbox-gl-js/example/3d-buildings/ -->
+<head>
+    <meta charset='utf-8' />
+    <title>Traditional Practices for Policy in Kyrgyzstan</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.41.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.41.0/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src='//api.tiles.mapbox.com/mapbox.js/plugins/turf/v2.0.0/turf.min.js' charset='utf-8'></script>
+    <script src='//d3js.org/d3.v3.min.js' charset='utf-8'></script>
+    <style>
+      body { margin:0; padding:0; }
+      #map { position:absolute; top:0; width:100%; height:100%; }
+      .mapboxgl-popup { max-width: 800px; font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;}
+    	.settings{
+    	position:absolute;
+    	right:0px;
+    	top:0px;
+    	width:10%;
+    	border-radius: 3px;
+    	}
+    	#buttons {position:relative;left:0px;top:0px;}
+    	.button {
+        display: inline-block;
+        position: relative;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 3px;
+        margin: 5px;
+        font-size: 12px;
+        text-align: center;
+        color: #fff;
+        background: #ee8a65;
+        font-family: sans-serif;
+        font-weight: bold;    
+    	}
+      #features-all {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 40%;
+        color:#fff;
+        border-radius: 3px;
+        text-align: justify;
+        text-justify: auto;
+      }
+    	#features {
+        background: #343332;
+        color:#fff;
+        border-radius: 3px;
+        text-align: justify;
+    	  text-justify: auto;
+    	}
+      #legendcontainer {
+      width: 50%;
+      } 
+      #legendbar {
+      height: 10px;
+      width: 100%;
+      padding-left: 10px;
+      padding-bottom:17px;
+      background: linear-gradient(to right, #80000000, #E6FFFFFF);
+      } 
+      
+      #timeslider{
+        color:white;
+        padding-left: 10px;
+        display:none;
+      }
+      
+      #fly{
+      text-align: center;
+      color: #fff;
+      background: #3887be;
+      border-radius: 3px;
+      width:25%;
+      display:none;
+      }
+    	
+      #feature-title {
+    	position:relative;
+    	padding:5px;
+    	margin-left: 5px;
+      margin-top: 2px;
+      margin-bottom: 2px;
+      margin-right: 5px;
+      font-weight: bold; 
+      font-family: sans-serif;
+      background: #343332;
+    	}
+    	#feature-content{
+    	position:relative;
+    	margin:5px;
+    	font-family: sans-serif;
+      background: #343332;
+    	}
+    	#backbutton {
+    	display:inline-block;
+        position: relative;
+        cursor: pointer;
+        
+        font-size: 12px;
+        color: #fff;
+        
+        font-family: sans-serif;
+        font-weight: bold;
+            
+        text-align: center;
+        width:49%;
+    	}
+    	#slidebutton {
+    	display:inline-block;
+        position: relative;
+        cursor: pointer;
+        
+        font-size: 12px;
+        color: #fff;
+        
+        font-family: sans-serif;
+        font-weight: bold;
+        
+        text-align: center;
+        width:49%;
+    	}
+      #marker {
+        background-image: url('/mapbox-gl-js/assets/washington-monument.jpg');
+        background-size: cover;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+    	#menu {
+        background: #b0c4dd;
+        position: relative;
+        z-index: 1;
+        border-radius: 3px;
+        font-family: sans-serif;
+   		 }
+   		#menu a {
+        font-size: 13px;
+        color: #404040;
+        display: block;
+        margin: 0;
+        padding: 10px;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(0,0,0,0.25);
+        text-align: center;
+    	}
+    	#menu a:last-child {border: none;}
+    	#menu a:hover {background-color: #3074a4;color: #ffffff;}
+    	#menu a.active {background-color: #3887be;color: #ffffff;}
+    	#menu a.active:hover {background: #3074a4;}
+
+
+      #slideout {
+    position: relative;
+    top: 40px;
+    left: 0;
+    width: 30px;
+    padding: 4px;
+    text-align: center;
+    background: #3887be;
+    -webkit-transition-duration: 0.3s;
+    -moz-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+    -o-transition-duration: 0.3s;
+    -webkit-border-radius: 0 5px 5px 0;
+    -moz-border-radius: 0 5px 5px 0;
+    border-radius: 0 5px 5px 0;
+    transition: all 0.4s ease-in-out;
+    color: #D3D3D3;
+    }
+    
+    .slideout-glow {
+      box-shadow: 0px 0px 20px rgba(255, 187, 51, .7);
+    }
+
+
+#slideout_inner {
+    position: fixed;
+    top: 40px;
+    left: -35%;
+    background: #3887be;
+    width: 35%;
+    padding: 5px;
+    -webkit-transition-duration: 0.3s;
+    -moz-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+    -o-transition-duration: 0.3s;
+    text-align: left;
+    -webkit-border-radius: 0 0 5px 0;
+    -moz-border-radius: 0 0 5px 0;
+    border-radius: 0 0 5px 0;
+}
+
+#slideout:hover #slideout_inner {
+    left: 0px;
+    top:5px;
+}
+.sideways{
+  writing-mode:vertical-rl;
+  text-orientation: sideways;
+}
+
+    </style>
+</head>
+<body>
+	
+<div id='map'></div>
+
+<div class='settings'>
+	<ul id="buttons">
+      <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">About</button>
+	</ul>
+	<!--menu for layer switchers -->
+	<nav id="menu"></nav>
+</div>
+
+<div id="features-all">
+  <div id='fly'>Begin migrating</div>
+  <div id="legendcontainer">
+     Slope
+     <div id="legendbar"> <p style="text-align:left">0° <span style="float:right; color:black;">39°</span></p></div>
+  </div>
+   <div id="timeslider">
+  Events of<br>
+  <label id='month'></label>
+  <input id='slider' type='range' min='0' max='11' step='1' value='0' /></div>
+  <div id='features'>
+	<div id='feature-title'></div>
+	<div id='feature-content'></div>
+	<div id='backbutton'><img src="./backbutton.png"></div>
+	<div id='slidebutton'><img src="./forwardbutton.png"></div>
+  </div>
+</div>
+
+<!-- slide out panel for SNA --> 
+<div id="slideout" class="slideout-glow">
+    <p class="sideways">Network Graphic</p>
+    <div id="slideout_inner">
+      <img src="images/network.png" width="100%">
+    </div>
+</div>
+
+ <!-- Modal "About" popup -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Why maps?</h4>
+        </div>
+        <div class="modal-body">
+          <p>Looking at these issues from a geographic perspective help us understand that our environment shapes how we act. Differences in our environments mean that each place should have solutions that are adapted to its context, rather than a single standard. As the effects of climate change impact our communities differently and more acutely, making our decision-making process more responsive and flexible will become ever more important. This research was meant to demonstrate how showing different practices by location can inform environmental policies that are responsive to different realities on the ground. </p>
+          <br>
+          <img src="images/about.jpg" align="right" width="50%">
+
+          <p>By understanding that practices and beliefs are influenced by the environment around us, this helps dispel the "weirdness" of unfamiliar beliefs. A person living in mountainous British Columbia may have more things in common than expected with a mountain shepherd in Kyrgyzstan! As a Chinese-Canadian who speaks French, Russian, and bits of Nepali, I hope to support a pluralistic view of the world where differences should be celebrated as things that make us stronger. And as experts of the area you live in and its unique differences, your voice becomes very important. Open-access mapping platforms like <a href="http://www.openstreetmap.org/" target="_blank">Open Street Map</a> give everyone with an Internet connection a way to shape how your neighbourhood is represented.</p>
+          <br>
+
+          <p>This research was done as part of a Masters program at Carleton University, Canada. The Mountain Societies Research Institute of the University of Central Asia (headquartered in Bishkek, Kyrgyzstan) provided invaluable support as a host organization. To see the original web atlas used by the Kyrgyz communities I worked with, click <a href="http://31.186.50.219:8080" target="_blank">here</a>. Any comments and questions are welcome at <a href="mailto:jasonnaryn@gmail.com?Subject=iAM%20Magazine%20Map%20Feedback" target="_top">jasonnaryn@gmail.com</a></p>  
+        </div>
+      </div>
+    </div>
+  </div>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoibWFkc2tpaWVyIiwiYSI6ImNpb2ZnaXVteTAwM3p2cGo3aHhqYnBkbWMifQ.cEswY6uB1-saGXwbS82DWA';
+var map = new mapboxgl.Map({
+    style: 'mapbox://styles/mapbox/dark-v9',
+    center: [75.079,41.655], 
+    zoom: 1.99,
+    pitch: 45,
+    bearing: -17.6,
+    hash: true,
+    container: 'map'
+});
+
+
+
+//categories for time slider
+var months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+];
+
+var title = document.getElementById('feature-title');
+var description = document.getElementById('feature-content');
+
+var locations = [
+	{
+    	"id":"1",
+    	"title":"Welcome to Kyrgyzstan",
+    	"description":"Located in Central Asia, Kyrgyzstan is made up of 7 provinces and a proud nomadic tradition. Formerly part of the Soviet Union, its collapse in 1991 has seen Kyrgyzstan emerge as a young democratic country establishing its own environmental protection policies. To promote the design of policies specifically suited to Kyrgyzstan rather than holdovers from the Soviet Union, my research used open-source mapping to draw out traditional practices. My hypothesis was that giving a platform for local people to share their expert knowledge could show how known, traditional practices could make government policies more flexible and effective.",
+    	"camera": {
+    		center:[75.079,41.655],
+    		zoom:1.99,
+    		pitch:15
+    	}
+    }
+	,{
+    	"id":"2",
+    	"title":"Semi-nomadism in Naryn",
+    	"description":"In provinces like Naryn where over 90% of the land is mountainous, people rely on herding animals as a main livelihood activity. Families travel with their yurts to graze their sheep, cows, and horses in higher pastures for the summer, returning in winter to their towns. Aside from herding, pasture users pursue a range of activities such as making woolen products to increase their income. After discussing with community members in Naryn about their interests, my research focussed on the three topics of pasture management, medicinal plants, and ecological monitoring. Taking multiple case studies shows how considering the multiple ways pasture ecosystems are used can make policies more effective and more likely to be followed.",
+    	"camera": {
+    		center:[ 74.862,42.638],
+    		zoom:5.76,
+    		pitch:50
+    	}
+    }
+    ,{
+    	"id":"3",
+    	"title":"Starting with Base Mapping",
+    	"description":"Kyrgyzstan's Soviet past has imprinted a strong memory of the central government controlling everything, while other management schemes were suppressed. To get the community involved again in managing its own environment, we gave mapping training using paper maps, smartphone apps, and walking tours of the towns. Key members in our research towns of Dobulu and Eki-Naryn were shown how to upload these changes on Open Street Map. Our goal was to show community members they could quickly make changes in the online maps of their towns with easy-to-learn tools. With an understanding of basic mapping, we turned our attention to learning about local-level adaptations that could improve existing policies.", 
+      "camera": {
+    		center:[76.2495,41.4897],
+    		zoom:9.61,
+    		pitch:30
+    	}
+    }		
+    ,{
+   		 "id":"4",
+    	"title":"Storytelling with Web Maps",
+    	"description":"Using participatory mapping and open ended interviews, we talked with community members about how they worked with the environment. Our participants were school children to pensioners, national park officials to herders. Hover over the tab above to see the different rates of gender representation in our research participants, by location. The web atlas was used as a canvas to place photos and practices for each town. This offers a perspective of maps as not only showing physical places, but also landscapes of decisions, relationships, and local adaptations. Based on the practices our participants shared, we identified several ways in which traditional ways could support official government policy.",
+    	"camera": {
+    		center:[76.2495,41.4897],
+    		zoom:10,
+    		pitch:30
+    	}
+    }
+    ,{
+       "id":"5",
+      "title":"High Pasture Migration Routes",
+      "description":"Herders tend to intensively use pastures near their villages because they are easier to reach, the roads to access these pastures are in better condition, and their yurts are more accessible to traders looking to buy milk products or to sell simple household goods such as soap. As a result, these pastures are often overgrazed. Interviewing elder herders, we mapped traditional routes across several remote pastures that have fallen into disrepair since Soviet times. Drawing on traditional knowledge helps demonstrate to the government ways to relieve pressure from overused nearby pastures: rebuild roads to make traditional remote pastures accessible.",
+      "camera": {
+        center:[76.7752, 41.5044],
+        zoom:9.42,
+        pitch:40
+      }
+    }
+    ,{
+       "id":"6",
+      "title":"Ecological Monitoring",
+      "description":"The Soviet Union used centrally determined dates for planting and harvesting. Since its collapse in 1991, Naryn residents have returned to traditional methods of forecasting the weather. With the effects of climate change making weather patterns more variable, traditional practices that are based on what people observe can help villagers determine the right time for them to start key livelihood activities. Use the slider above to see both locally-observed events and previously centrally controlled events, and consider how responsive each method is to the environment around it.",
+      "camera": {
+        center:[76.674, 41.616],
+        zoom:7.58,
+        pitch:44
+      }
+    }
+    ,{
+       "id":"7",
+      "title":"Cataloguing Medicinal Plants",
+      "description":"Many medicinal plants are encountered in the wild, but few among the younger generation know how to identify and store them properly. By interviewing elders and reviewing their collections, we have begun an online platform to list plants, the terrain they are found in, their distinguishing features, and what they treat. A public medicinal plant catalog can also help build dialogue between herders in the field and botanical experts in the capital of Bishkek. Our web atlas allows both sides to log on, add plants, and write recommendations or questions for each plant. The lines show the various groups connected through our catalog.",
+      "camera": {
+        center:[75.827, 42.023],
+        zoom:7.58,
+        pitch:37
+      }
+    }
+    ,{
+       "id":"8",
+      "title":"A push towards SDG 17: A sustainable development knowledge platform",
+      "description":"SDG 17 speaks to the need to rethink how development should be done. Rather than taking policies from developed countries and applying them to developing countries, SDG 17 pushes for an equal partnership and dialogue between both sides. A critical part of this is making open data available, and to acknowledge the validity of traditional knowledge. This project joins the growing community of open data efforts in Kyrgyzstan to present different perspectives and priorities on the ground. We aim to create a transparent space where policies that utilize local knowledge can be created. To learn more about this philosophy, click on 'About' in the top-right corner.",
+      "camera": {
+        center:[74.851, 41.91],
+        zoom:5.67,
+        pitch:37
+      }
+    }
+    ];
+ 
+//stops along migration tour
+var flyspots = [{"start":[76.529977533567489, 41.503443869772582], "zoom":13.49, "bearing":91.9, "speed":2, "curve":1, "pitch":50}
+                ,{"start":[76.7222382757285, 41.494186893012383], "zoom":13.49, "bearing":91.9, "speed":0.2, "curve":0.5, "pitch":60}
+                ,{"start":[76.917245599919497, 41.536346848537995], "zoom":13.49, "bearing":75.1, "speed":0.05, "curve":0.1,"pitch":60}
+                ,{"start":[77.054574701462812, 41.521953853738246], "zoom":13.49, "bearing":98.3, "speed":0.2, "curve":0.1,"pitch":60}
+                ,{"start":[77.069680902633138, 41.473611096546307], "zoom":13.49, "bearing":167.1, "speed":0.2, "curve":0.1,"pitch":60}
+                ,{"start":[77.2751, 41.4882], "zoom":10.87, "bearing":1.8, "speed":0.5, "curve":0.5,"pitch":22}
+];
+//function to fly to points along migration tour
+var holder = 0;
+document.getElementById('fly').addEventListener('click', function() {
+  if(holder!=flyspots.length){
+    document.getElementById("fly").innerHTML = "Continue";
+    map.flyTo({
+        
+        // These options control the ending camera position: centered at
+        // the target, at zoom level 9, and north up.
+        center: flyspots[holder].start,
+        zoom: flyspots[holder].zoom,
+        bearing: flyspots[holder].bearing,
+
+        // These options control the flight curve, making it move
+        // slowly and zoom out almost completely before starting
+        // to pan.
+        speed: flyspots[holder].speed, // make the flying slow
+        curve: flyspots[holder].curve, // change the speed at which it zooms out
+        pitch: flyspots[holder].pitch,
+        // This can be any easing function: it takes a number between
+        // 0 and 1 and returns another number between 0 and 1.
+        easing: function (t) {
+            return t;
+        }
+    });
+  holder = holder + 1;
+  } else{holder = 0;
+    document.getElementById("fly").innerHTML = "Start again";}
+  
+});
+
+//function to filter eco_monitoring features by month
+function filterBy(month) {
+
+    var filters = ['==', 'time', month];
+    map.setFilter('eco_monitoring', filters);
+
+    // Set the label to the month
+    document.getElementById('month').textContent = months[month];
+}
+//function to make the camera pan to the next slide    
+function playback(index) {
+    title.textContent = locations[index].title;
+    description.textContent = locations[index].description;
+    // Animate the map position based on camera properties
+    map.flyTo(locations[index].camera);
+}
+// Toggle visible layers
+var toggleableLayerIds = [ 'Slope map', 'Provinces', 'Study Sites' ];
+
+for (var i = 0; i < toggleableLayerIds.length; i++) {
+    var id = toggleableLayerIds[i];
+
+    var link = document.createElement('a');
+    link.href = '#';
+    link.className = 'active';
+    link.textContent = id;
+
+    link.onclick = function (e) {
+        var clickedLayer = this.textContent;
+        e.preventDefault();
+        e.stopPropagation();
+
+        var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+
+        if (visibility === 'visible') {
+            map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+            this.className = '';
+        } else {
+            this.className = 'active';
+            map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+        }
+    };
+
+    var layers = document.getElementById('menu');
+    layers.appendChild(link);
+}
+
+map.on('load', function() {
+  //add source and layer for timeslider content
+  d3.json('Geospatial Data/eco_monitoring.geojson', function(err, data) {
+        if (err) throw err;
+        // Create a month property value based on time
+        // used to filter against.
+        data.features = data.features.map(function(d) {
+            d.properties.month = new Date(d.properties.time).getMonth();
+            return d;
+        });
+
+        map.addSource("eco_monitoring", {
+            "type": "geojson",
+            "data": data
+        });
+
+        map.loadImage('images/leaf-change.png',function(error,image){
+          if (error) throw error;
+          map.addImage("leaf-change", image);
+          map.addLayer({
+            "id": "eco_monitoring",
+            "type": "symbol",
+            "source": "eco_monitoring",
+            "layout":{
+              "icon-image": "leaf-change",
+              "icon-size":0.03,   
+              "visibility":"none",     
+              "icon-allow-overlap":true
+            }  
+          });
+        })
+        // Set time slider filter to first month of the year
+        // 0 = January
+        filterBy(0);
+        document.getElementById('slider').addEventListener('input', function(e) {
+            var month = parseInt(e.target.value, 10);
+            filterBy(month);
+        });
+  });
+	//Load external GeoJSON files
+	map.addSource("ussr_with_KG", {
+            "type": "geojson",
+            "data": "Geospatial Data/ussr_with_KG.geojson"
+  });
+  map.addSource("before_after_osm", {
+            "type": "geojson",
+            "data": "Geospatial Data/before_after_osm.geojson"
+  });
+  map.addSource("Provinces", {
+            "type": "geojson",
+            "data": "Geospatial Data/kg_provinces.geojson"
+        });
+  map.addSource('Slope map', {
+   "type": 'raster',
+   "url": 'mapbox://madskiier.b583hmyd',
+   "tileSize":256
+  });
+  map.addSource('pasture_route', {
+   "type": 'geojson',
+   'data': 'Geospatial Data/p2.geojson',
+  });
+  
+   map.addSource("medplants", {
+            "type": "geojson",
+            "data": "Geospatial Data/finalmedplants.geojson"
+  });
+   
+
+  var layers = map.getStyle().layers;
+    // Find the index of the first symbol layer in the map style
+    var firstSymbolId;
+    for (var i = 0; i < layers.length; i++) {
+        if (layers[i].type === 'symbol') {
+            firstSymbolId = layers[i].id;
+            break;
+        }
+    }
+	
+	// Add zoom and rotation controls to the map.
+	map.addControl(new mapboxgl.NavigationControl());
+	//map.addControl(new mapboxgl.FullscreenControl());
+
+    // Insert the building-height (from OSM) layer beneath any symbol layer.
+    var layers = map.getStyle().layers.reverse();
+    var labelLayerIdx = layers.findIndex(function (layer) {
+        return layer.type !== 'symbol';
+    });
+    var labelLayerId = labelLayerIdx !== -1 ? layers[labelLayerIdx].id : undefined;
+  
+    // Add layers
+    map.addLayer({
+            "id": "Slope map",
+            "type": "raster",
+            "source": "Slope map",
+            'paint': {
+              "raster-opacity": 0.5  
+            }  
+        });
+    map.addLayer({
+            "id": "image",
+            "type": "raster",
+            "source": "image",
+            'paint': {
+              "raster-opacity": 0.7  
+            },
+            'layout': {
+              'visibility':'none'
+            }
+        });
+    map.addLayer({
+            "id": "USSR-KG",
+            "type": "fill",
+            "source": "ussr_with_KG",
+            'paint': {
+              'fill-color': {
+                'type':'identity',
+                'property':'color'
+              }
+              ,'fill-opacity': 0.5
+            }  
+        },firstSymbolId);
+    map.addLayer({
+            "id": "Provinces",
+            "type": "fill",
+            "source": "Provinces",
+            'paint': {
+              'fill-color': {
+                'type':'identity',
+                'property':'color'
+              }
+              ,'fill-opacity': 0.6
+              ,'fill-outline-color':"#ffff00"
+            },
+            'layout': {
+              'visibility':'none'
+            }  
+        },firstSymbolId);
+    
+     map.addLayer({
+            "id": "pasture_route"
+            ,"type": "line"
+            ,"source": "pasture_route"
+            ,"paint":{
+              "line-color":{
+                'type':'identity',
+                'property':'color'
+              }
+            } 
+            ,"layout":{"visibility":"none"}
+    })   
+            
+     map.addLayer({
+            "id": "medplants_links"
+            ,"type": "line"
+            ,"layout":{"visibility":'none'}
+            ,"source": {    
+              'type': 'geojson',
+              'data': {
+                'type': 'FeatureCollection',
+                'features': [{
+                    'type': 'Feature',
+                    'properties': {
+                        'color': '#e5e500'
+                    },
+                    'geometry': {
+                        'type': 'LineString',
+                        'coordinates': [
+                        [ 76.243407386000058, 41.449654125000052], //dobulu
+                        [ 74.606129741270522, 42.850998846982101]//aigine
+                        ]
+                    }
+                },
+                {
+                  "type": "Feature",
+                  "properties": {'color':'#DA70D6'},
+                  "geometry": {
+                    'type': 'LineString',
+                    "coordinates": [
+                      [74.606129741270522, 42.850998846982101], //aigine
+                      [76.437952874000075, 41.51599247200005]//EK
+                    ]
+                  }
+                },
+                {
+                  "type": "Feature",
+                  "properties": {'color':'#DA70D6'},
+                  "geometry": {
+                    'type': 'LineString',
+                    "coordinates": [
+                      [74.60861309197503, 42.872295168975818], //KNAU
+                      [76.437952874000075, 41.51599247200005]//EK
+                    ]
+                  }
+                },
+                {
+                  "type": "Feature",
+                  "properties": {'color':'#e5e500'},
+                  "geometry": {
+                    'type': 'LineString',
+                    "coordinates": [
+                      [74.60861309197503, 42.872295168975818], //KNAU
+                      [76.243407386000058, 41.449654125000052]//Dob
+                    ]
+                  }
+                },
+                {
+                  "type": "Feature",
+                  "properties": {'color':'#e5e500'},
+                  "geometry": {
+                    'type': 'LineString',
+                    "coordinates": [
+                      [75.996681833132271, 41.429489773444516], //NSU
+                      [76.243407386000058, 41.449654125000052]//Dob
+                    ]
+                  }
+                },
+                {
+                  "type": "Feature",
+                  "properties": {'color':'#DA70D6'},
+                  "geometry": {
+                    'type': 'LineString',
+                    "coordinates": [
+                      [75.996681833132271, 41.429489773444516], //NSU
+                      [76.437952874000075, 41.51599247200005]//EK
+                    ]
+                  }
+                }],
+                "type": "FeatureCollection"
+              }
+            },
+            'paint': {
+            'line-width': 3,
+            'line-color': {
+                'type': 'identity',
+                'property': 'color'
+            }
+            }
+      });
+
+    map.addLayer({
+        'id': '3d-buildings',
+        'source': 'composite',
+        'source-layer': 'building',
+        'filter': ['==', 'extrude', 'true'],
+        'type': 'fill-extrusion',
+        'minzoom': 13,
+        'paint': {
+            //pale yellow -  'fill-extrusion-color': '#e5efc6',
+            //Colour the buildings by their height
+            'fill-extrusion-color': { 
+            	'property': 'height',
+            	'stops':[
+            	[0, '#f09422'],
+            	[50, '#adff2f']
+            	]
+            },	
+            'fill-extrusion-height': {
+                'type': 'identity',
+                'property': 'height'
+            },
+            'fill-extrusion-base': {
+                'type': 'identity',
+                'property': 'min_height'
+            },
+            'fill-extrusion-opacity': .6
+        }
+    }, labelLayerId);
+   //loads marker images for the before_after_osm layer
+   map.loadImage('images/icon.png',function(error,image){
+      if (error) throw error;
+      map.addImage("icon", image);
+    
+   map.addLayer({
+            "id": "Study Sites",
+            "type": "symbol",
+            "source": "before_after_osm",
+            "layout":{
+              "icon-image": "icon",
+              "icon-size":0.07,
+              "icon-allow-overlap":true,
+              "visibility":"none"
+            }  
+        });
+   })
+   //loads markers for medplants 
+   map.loadImage('images/icon_medplants.ico',function(error,image){
+      if (error) throw error;
+      map.addImage("icon_medplants", image);
+    
+   map.addLayer({
+            "id": "medplants",
+            "type": "symbol",
+            "source": "medplants",
+            "layout":{
+              "icon-image": "icon_medplants",
+              "icon-size":0.15,
+              "icon-allow-overlap":true,
+              "visibility":"none"
+            }  
+        });
+   })
+    
+    // Create a popup, but don't add it to the map yet.
+    var popup = new mapboxgl.Popup({
+        closeButton: true,
+        closeOnClick: false
+    });
+    // custom popups for migration tour.
+    //var popup_pastures = new mapboxgl.Popup({
+    //    closeOnClick: false,
+    //})
+    //  .setHTML("Hi")
+    //  .setLngLat([76.6482,41.4914])
+    //  .addTo(map);
+
+
+    //pop ups for before-after markers
+    map.on('click', 'Study Sites', function(e) {
+        // Change the cursor style as a UI indicator.
+        map.getCanvas().style.cursor = 'pointer';
+        // Populate the line popup and set its coordinates based on the first coordinates of the line
+        popup.setLngLat(e.lngLat)
+            .setHTML('<h3>'+ e.features[0].properties.Name + '</h3>' 
+              + e.features[0].properties.description
+              + '<br> <img src="' + e.features[0].properties.image+ '" width="300"> <br>'
+              + e.features[0].properties.caption
+              )
+            .addTo(map);
+    });
+
+    //pop ups for KG Provinces
+    map.on('click', 'Provinces', function(e) {
+        // Change the cursor style as a UI indicator.
+        map.getCanvas().style.cursor = 'pointer';
+        // Populate the line popup and set its coordinates based on the first coordinates of the line
+        popup.setLngLat(e.lngLat)
+            .setHTML('<h4>'+ e.features[0].properties.VARNAME_1 + ' ' + e.features[0].properties.ENGTYPE_1 + '</h4>' 
+              + 'Average 2016 earnings for agriculture, forestry, and fishing: ' + e.features[0].properties.wage_agric_forest_fish + ' Kyrgyz som'
+              + '<img src="' + e.features[0].properties.image +'">'
+            )
+            .addTo(map);
+    });
+    //pop ups for medplants
+    map.on('click', 'medplants', function(e) {
+        // Change the cursor style as a UI indicator.
+        map.getCanvas().style.cursor = 'pointer';
+        // Populate the line popup and set its coordinates based on the first coordinates of the line
+        popup.setLngLat(e.lngLat)
+            .setHTML('<h4>'+ e.features[0].properties.Name + '</h4>' 
+              +'<img src="' + e.features[0].properties.link +'" align="right" width="400">'
+              + e.features[0].properties.description 
+               
+            )
+            .addTo(map);
+    });
+    //pop ups for timeslider eco monitoring
+    map.on('click', 'eco_monitoring', function(e) {
+        // Change the cursor style as a UI indicator.
+        map.getCanvas().style.cursor = 'pointer';
+        // Populate the line popup and set its coordinates based on the first coordinates of the line
+        popup.setLngLat(e.lngLat)
+            .setHTML(
+              e.features[0].properties.description
+            )
+            .addTo(map);
+    });
+
+    //Pans the camera to the next or previous location on "locations" when the slidebutton is clicked
+	index = 0;
+    document.getElementById('slidebutton').addEventListener('click', function(event) {
+        index = (index + 1 === locations.length) ? 0 : index + 1;
+            playback(index);
+            //reset migration tour buttons
+            if (index!=4){
+            holder =0;
+            document.getElementById("fly").innerHTML = "Begin migrating";
+            fly.style.display="none";
+            } else {
+              fly.style.display="block";
+            }
+            //turns on or off the USSR layer depending on what slide you are currently viewing while pressing the forward-slide button
+            tempvar = (index === 0) ? map.setLayoutProperty('USSR-KG', 'visibility','visible') : map.setLayoutProperty('USSR-KG', 'visibility','none');
+            tempvar2 = (index === 1) ? map.setLayoutProperty('image', 'visibility','visible')  : map.setLayoutProperty('image', 'visibility','none');
+            tempvar3 = (index === 1) ? map.setLayoutProperty('Provinces', 'visibility','visible') : map.setLayoutProperty('Provinces', 'visibility','none');
+            tempvar4 = (index === 2) ? map.setLayoutProperty('Study Sites', 'visibility','visible') : map.setLayoutProperty('Study Sites', 'visibility','none');
+            tempvar5 = (index === 5) ? map.setLayoutProperty('eco_monitoring', 'visibility','visible') : map.setLayoutProperty('eco_monitoring', 'visibility','none');
+            tempvar7 = (index === 5) ? timeslider.style.display="block" : timeslider.style.display="none";
+            tempvar6 = (index === 6) ? map.setLayoutProperty('medplants', 'visibility','visible') : map.setLayoutProperty('medplants', 'visibility','none');
+            tempvar8 = (index === 6) ? map.setLayoutProperty('medplants_links', 'visibility','visible') : map.setLayoutProperty('medplants_links', 'visibility','none');
+            tempvar9 = (index === 4) ? map.setLayoutProperty('pasture_route', 'visibility','visible') : map.setLayoutProperty('pasture_route', 'visibility','none');
+            
+
+    });
+    document.getElementById('backbutton').addEventListener('click', function(event) {
+        index = (index - 1 === -1) ? locations.length-1 : index - 1;
+            playback(index);
+            //reset migration tour buttons
+            if (index!=4){
+              holder =0;
+              document.getElementById("fly").innerHTML = "Begin migrating";
+              fly.style.display="none";
+            } else {
+              fly.style.display="block";
+            }
+            //turns on or off the buffer layer depending on what slide you are currently viewing while pressing the back-slide button
+            tempvar = (index === 0) ? map.setLayoutProperty('USSR-KG', 'visibility','visible') : map.setLayoutProperty('USSR-KG', 'visibility','none');
+            tempvar2 = (index === 1) ? map.setLayoutProperty('image', 'visibility','visible') : map.setLayoutProperty('image', 'visibility','none');
+            tempvar3 = (index === 1) ? map.setLayoutProperty('Provinces', 'visibility','visible') : map.setLayoutProperty('Provinces', 'visibility','none');
+            tempvar4 = (index === 2) ? map.setLayoutProperty('Study Sites', 'visibility','visible') : map.setLayoutProperty('Study Sites', 'visibility','none');
+            tempvar5 = (index === 5) ? map.setLayoutProperty('eco_monitoring', 'visibility','visible') : map.setLayoutProperty('eco_monitoring', 'visibility','none');
+            tempvar7 = (index === 5) ? timeslider.style.display="block" : timeslider.style.display="none";
+            tempvar6 = (index === 6) ? map.setLayoutProperty('medplants', 'visibility','visible') : map.setLayoutProperty('medplants', 'visibility','none');
+            tempvar8 = (index === 6) ? map.setLayoutProperty('medplants_links', 'visibility','visible') : map.setLayoutProperty('medplants_links', 'visibility','none');
+            tempvar9 = (index === 4) ? map.setLayoutProperty('pasture_route', 'visibility','visible') : map.setLayoutProperty('pasture_route', 'visibility','none');
+    });
+    // Start the playback animation for the prepared slides
+    playback(index);
+});
+</script>
+</body>
+</html>
