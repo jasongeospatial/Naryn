@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-<!--Example using Mapbox GL Javascript to create 3D extruded buildings. Source: https://www.mapbox.com/mapbox-gl-js/example/3d-buildings/ -->
 <head>
     <meta charset='utf-8' />
     <title>Traditional Practices for Policy in Kyrgyzstan</title>
@@ -11,7 +10,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src='//api.tiles.mapbox.com/mapbox.js/plugins/turf/v2.0.0/turf.min.js' charset='utf-8'></script>
-    <script src='//d3js.org/d3.v3.min.js' charset='utf-8'></script>
+    <script src='//d3js.org/d3.v4.min.js' charset='utf-8'></script>
+
     <style>
       body { margin:0; padding:0; }
       #map { position:absolute; top:0; width:100%; height:100%; }
@@ -40,23 +40,29 @@
     	}
       #features-all {
         position: absolute;
+        top:0;
         bottom: 0;
         left: 0;
-        width: 40%;
+        width: 25%;
         color:#fff;
         border-radius: 3px;
         text-align: justify;
         text-justify: auto;
+        background:white;
       }
-    	#features {
-        background: #343332;
-        color:#fff;
-        border-radius: 3px;
-        text-align: justify;
-    	  text-justify: auto;
-    	}
+    	
+    	.legend {                                                   /* NEW */
+        font-size: 2px;                                          /* NEW */
+      }                                                           /* NEW */
+      rect {                                                      /* NEW */
+        stroke-width: 0.5;                                          /* NEW */
+      }                                                           /* NEW */
       #legendcontainer {
-      width: 50%;
+      position:absolute;
+      left:25%;
+      bottom:0%;
+      width:15%;
+      padding:10px;
       } 
       #legendbar {
       height: 10px;
@@ -70,14 +76,16 @@
         color:white;
         padding-left: 10px;
         display:none;
+
       }
       
       #fly{
+      position: relative;
+      width:50%;
       text-align: center;
       color: #fff;
       background: #3887be;
       border-radius: 3px;
-      width:25%;
       display:none;
       }
     	
@@ -89,42 +97,61 @@
       margin-bottom: 2px;
       margin-right: 5px;
       font-weight: bold; 
-      font-family: sans-serif;
-      background: #343332;
+      font-family: Roboto Condensed, sans-serif;
+      color: red;
+    	}
+    	#feature-photo{
+    		position: relative;
+    		height:33%;
     	}
     	#feature-content{
     	position:relative;
     	margin:5px;
-    	font-family: sans-serif;
-      background: #343332;
+    	font-family: Roboto Condensed, sans-serif;
+    	color:black;
+      
     	}
     	#backbutton {
     	display:inline-block;
-        position: relative;
+        position: absolute;
         cursor: pointer;
-        
+        bottom:0;
+        left:0;
+        padding:5px;
         font-size: 12px;
         color: #fff;
-        
         font-family: sans-serif;
         font-weight: bold;
-            
         text-align: center;
-        width:49%;
+        width:40%;
+    	}
+    	#pageindex {
+    	display:inline-block;
+        position: absolute;
+        padding:5px;
+        left:40%;
+        right:40%;
+        bottom:0;
+        font-size: 12px;
+        font-family: Roboto Condensed, sans-serif;
+        font-weight: bold;
+        text-align: center;
+        width:10%;
+        color:black;
     	}
     	#slidebutton {
     	display:inline-block;
-        position: relative;
+        position: absolute;
         cursor: pointer;
-        
+        padding:5px;
+        bottom:0;
+        right:0;
         font-size: 12px;
         color: #fff;
-        
         font-family: sans-serif;
         font-weight: bold;
-        
         text-align: center;
-        width:49%;
+        width:40%;
     	}
       #marker {
         background-image: url('/mapbox-gl-js/assets/washington-monument.jpg');
@@ -158,28 +185,20 @@
 
 
       #slideout {
-    position: relative;
-    top: 40px;
-    left: 0;
+    position: absolute;
+    top: 35%;
+    left: 25%;
     width: 30px;
     padding: 4px;
     text-align: center;
     background: #3887be;
-    -webkit-transition-duration: 0.3s;
-    -moz-transition-duration: 0.3s;
-    transition-duration: 0.3s;
-    -o-transition-duration: 0.3s;
-    -webkit-border-radius: 0 5px 5px 0;
-    -moz-border-radius: 0 5px 5px 0;
-    border-radius: 0 5px 5px 0;
-    transition: all 0.4s ease-in-out;
+   display:none;
     color: #D3D3D3;
     }
     
     .slideout-glow {
       box-shadow: 0px 0px 20px rgba(255, 187, 51, .7);
     }
-
 
 #slideout_inner {
     position: fixed;
@@ -188,31 +207,154 @@
     background: #3887be;
     width: 35%;
     padding: 5px;
-    -webkit-transition-duration: 0.3s;
-    -moz-transition-duration: 0.3s;
-    transition-duration: 0.3s;
-    -o-transition-duration: 0.3s;
-    text-align: left;
-    -webkit-border-radius: 0 0 5px 0;
-    -moz-border-radius: 0 0 5px 0;
+    
     border-radius: 0 0 5px 0;
 }
 
 #slideout:hover #slideout_inner {
-    left: 0px;
-    top:5px;
+    left: 25%;
+    top:0px;
 }
 .sideways{
   writing-mode:vertical-rl;
   text-orientation: sideways;
 }
+#chart {                                                          /* NEW */
+        height: 360px;                                                  
+        position: relative;                                             
+        width: 360px;                                                   
+        margin: 0 auto;                                               
+      }                                                                
+      .tooltip {                                                        /* NEW */
+        background: #eee;                                              
+        box-shadow: 0 0 5px #999999;                                   
+        color: #333;                                                   
+        display: none;                                                 
+        font-size: 12px;                                               
+        left: 130px;                                                   
+        padding: 10px;                                                  
+        position: absolute;                                             
+        text-align: center;                                             
+        top: 95px;                                                      
+        width: 80px;                                                    
+        z-index: 10;                                                    
+      }                                                                 
+  .legend {
+    font-size: 12px;
+  }
+  rect {
+    stroke-width: 2;
+    cursor: pointer;                                              
+  }
+  rect.disabled {                                                 /* NEW */
+        fill: transparent !important;                                 
+      }                                                               
+      h1 {                                                            
+        font-size: 14px;                                              
+        text-align: center;                                           
+      }                                                               
 
+h3{
+	color:black;
+}
+/*Styling for time slider*/
+input[type=range] {
+  height: 38px;
+  -webkit-appearance: none;
+  margin: 0;
+  width: 100%;
+  opacity: 0.7;
+  background:#00000000;
+}
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 10px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: 1px 1px 1px #000000;
+  background: #3071A9;
+  border-radius: 5px;
+  border: 1px solid #000000;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  box-shadow: 1px 1px 1px #000000;
+  border: 1px solid #000000;
+  height: 25px;
+  width: 7px;
+  border-radius: 5px;
+  background: #FFFFFF;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -11px;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: #3071A9;
+}
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 10px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: 1px 1px 1px #000000;
+  background: #3071A9;
+  border-radius: 5px;
+  border: 1px solid #000000;
+}
+input[type=range]::-moz-range-thumb {
+  box-shadow: 1px 1px 1px #000000;
+  border: 1px solid #000000;
+  height: 30px;
+  width: 15px;
+  border-radius: 5px;
+  background: #FFFFFF;
+  cursor: pointer;
+}
+input[type=range]::-ms-track {
+  width: 100%;
+  height: 10px;
+  cursor: pointer;
+  animate: 0.2s;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+  background: #3071A9;
+  border: 1px solid #000000;
+  border-radius: 10px;
+  box-shadow: 1px 1px 1px #000000;
+}
+input[type=range]::-ms-fill-upper {
+  background: #3071A9;
+  border: 1px solid #000000;
+  border-radius: 10px;
+  box-shadow: 1px 1px 1px #000000;
+}
+input[type=range]::-ms-thumb {
+  margin-top: 1px;
+  box-shadow: 1px 1px 1px #000000;
+  border: 1px solid #000000;
+  height: 30px;
+  width: 15px;
+  border-radius: 5px;
+  background: #FFFFFF;
+  cursor: pointer;
+}
+input[type=range]:focus::-ms-fill-lower {
+  background: #3071A9;
+}
+input[type=range]:focus::-ms-fill-upper {
+  background: #3071A9;
+}
     </style>
 </head>
 <body>
 	
 <div id='map'></div>
-
 <div class='settings'>
 	<ul id="buttons">
       <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">About</button>
@@ -222,23 +364,25 @@
 </div>
 
 <div id="features-all">
-  <div id='fly'>Begin migrating</div>
-  <div id="legendcontainer">
-     Slope
-     <div id="legendbar"> <p style="text-align:left">0° <span style="float:right; color:black;">39°</span></p></div>
-  </div>
-   <div id="timeslider">
-  Events of<br>
-  <label id='month'></label>
-  <input id='slider' type='range' min='0' max='11' step='1' value='0' /></div>
-  <div id='features'>
+  	<div id='feature-photo'></div>
 	<div id='feature-title'></div>
-	<div id='feature-content'></div>
+	<div id='feature-content'></div>  
 	<div id='backbutton'><img src="./backbutton.png"></div>
+	<div id="pageindex">1/8</div>
 	<div id='slidebutton'><img src="./forwardbutton.png"></div>
-  </div>
 </div>
 
+<div id="legendcontainer">
+	 <div id='fly' class="slideout-glow">Click here to follow a traditional route</div>
+	 <div id="timeslider">
+  		Events of<br>
+ 		<label id='month' ></label>
+  		<input id='slider' type='range' min='0' max='11' step='1' value='0' />
+   	 </div>
+     <div id ="slope" style="color:white;">Slope</div>
+     <div id="legendbar"> <p style="text-align:left;color:white;">0° <span style="float:right; color:black;">39°</span></p></div>
+    
+</div>
 <!-- slide out panel for SNA --> 
 <div id="slideout" class="slideout-glow">
     <p class="sideways">Network Graphic</p>
@@ -246,7 +390,22 @@
       <img src="images/network.png" width="100%">
     </div>
 </div>
+  <div class="modal fade" id="welcome" role="dialog">
+  	<div class="modal-dialog modal-lg">
+  	 <div class="modal-content">
+  		<div class="modal-header">
+  			
+  			<h4 class="modal-title">Mapping Traditional Knowledge and Governance</h4>
+  		</div>
+  		<div class="modal-body">
+  			 <p>Have you ever wondered how we can have more say in how we use our environment? After all, we live in it and know it well because of our every-day experiences.  After working in the mountains of Nepal, Tajikistan, and Kyrgyzstan for 3 years, I saw first hand how resourceful people were in adapting to harsh environments. At the same time, these adaptations were rarely recognized or even known by others outside of town! I decided to dedicate my Master's degree and eight months of fieldwork to understand how people used their lived experience or <i>traditional knowledge</i>. We created an open web atlas to make it easier for our participants to share and see their traditional knowledge, and studied how this mapping affected their perceptions of environmental policy.  
 
+  			 <p>This website shows my team's work in rugged Kyrgyzstan and implications for how the average citizen can be included to make better policy decisions. Explore this fascinating and storied part of the world by zooming, clicking, and panning the map around. You can turn off certain layers using the buttons on the right side. To learn more about the philosophy behind this project, click on "About" in the top right corner. 
+  			
+  		</div>
+	 </div>
+    </div>
+  </div>
  <!-- Modal "About" popup -->
   <div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog modal-lg">
@@ -269,6 +428,7 @@
     </div>
   </div>
 <script>
+	$('#welcome').modal('show');
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFkc2tpaWVyIiwiYSI6ImNpb2ZnaXVteTAwM3p2cGo3aHhqYnBkbWMifQ.cEswY6uB1-saGXwbS82DWA';
 var map = new mapboxgl.Map({
     style: 'mapbox://styles/mapbox/dark-v9',
@@ -279,8 +439,6 @@ var map = new mapboxgl.Map({
     hash: true,
     container: 'map'
 });
-
-
 
 //categories for time slider
 var months = [
@@ -298,14 +456,16 @@ var months = [
     'December'
 ];
 
+var image = document.getElementById('feature-photo');
 var title = document.getElementById('feature-title');
 var description = document.getElementById('feature-content');
 
 var locations = [
 	{
     	"id":"1",
+    	"image":"<img src=\'./images/welcome.jpg\' style=\'max-width:100%;max-height:100%;object-fit:contain;display: block;margin: 0 auto;padding:10px\'>",
     	"title":"Welcome to Kyrgyzstan",
-    	"description":"Located in Central Asia, Kyrgyzstan is made up of 7 provinces and a proud nomadic tradition. Formerly part of the Soviet Union, its collapse in 1991 has seen Kyrgyzstan emerge as a young democratic country establishing its own environmental protection policies. To promote the design of policies specifically suited to Kyrgyzstan rather than holdovers from the Soviet Union, my research used open-source mapping to draw out traditional practices. My hypothesis was that giving a platform for local people to share their expert knowledge could show how known, traditional practices could make government policies more flexible and effective.",
+    	"description":"Located in Central Asia, Kyrgyzstan is made up of seven provinces and a proud nomadic tradition. Formerly part of the Soviet Union, its collapse in 1991 has seen Kyrgyzstan emerge as a young democratic country establishing its own environmental protection policies. To promote the design of policies specifically suited to Kyrgyzstan rather than holdovers from the Soviet Union, my research used open-source mapping to publish traditional practices. I hypothesized that providing a platform for local people to share their traditional practices and expertise could help guide government policies to be more flexible and effective.",
     	"camera": {
     		center:[75.079,41.655],
     		zoom:1.99,
@@ -314,8 +474,9 @@ var locations = [
     }
 	,{
     	"id":"2",
+    	"image":"<img src=\'./images/yurt2.jpg\' style=\'max-width:100%;max-height:100%;object-fit:contain;display: block;margin: 0 auto;padding:10px\'>",
     	"title":"Semi-nomadism in Naryn",
-    	"description":"In provinces like Naryn where over 90% of the land is mountainous, people rely on herding animals as a main livelihood activity. Families travel with their yurts to graze their sheep, cows, and horses in higher pastures for the summer, returning in winter to their towns. Aside from herding, pasture users pursue a range of activities such as making woolen products to increase their income. After discussing with community members in Naryn about their interests, my research focussed on the three topics of pasture management, medicinal plants, and ecological monitoring. Taking multiple case studies shows how considering the multiple ways pasture ecosystems are used can make policies more effective and more likely to be followed.",
+    	"description":"In provinces like Naryn where over 90% of the land is mountainous, people rely on herding animals as a main livelihood activity. Zoom in closely on the map to see the slope of the land, with steep hills carved by valleys and rivers. Families travel with their yurts (traditional portable wood and felt homes) to graze their sheep, cows, and horses in higher pastures for the summer, returning in winter to their towns. Aside from herding, pasture users pursue a range of activities such as making cheese products to increase their income. Click on a province to see its major sectors of employment. <br><br>After discussing with Naryn community members about their interests, my research focussed on the three topics of pasture management, medicinal plants, and ecological monitoring. Applying multiple case studies can help understand the different ways pasture ecosystems are used. Accounting for people's varied interests rather than just the central government's priorities can make policies more effective and more likely to be followed.",
     	"camera": {
     		center:[ 74.862,42.638],
     		zoom:5.76,
@@ -324,8 +485,9 @@ var locations = [
     }
     ,{
     	"id":"3",
+    	"image":"<img src=\'./images/basemapping.jpeg\' style=\'max-width:100%;max-height:100%;object-fit:contain;display: block;margin: 0 auto;padding:10px\'>",
     	"title":"Starting with Base Mapping",
-    	"description":"Kyrgyzstan's Soviet past has imprinted a strong memory of the central government controlling everything, while other management schemes were suppressed. To get the community involved again in managing its own environment, we gave mapping training using paper maps, smartphone apps, and walking tours of the towns. Key members in our research towns of Dobulu and Eki-Naryn were shown how to upload these changes on Open Street Map. Our goal was to show community members they could quickly make changes in the online maps of their towns with easy-to-learn tools. With an understanding of basic mapping, we turned our attention to learning about local-level adaptations that could improve existing policies.", 
+    	"description":"Kyrgyzstan's Soviet legacy has imprinted a strong memory of overtly centralized government control, while other management schemes were suppressed. To get the community involved again in managing its own environment, we provided training by using paper maps, smartphone apps, and walking tours of the towns. Key members in our research towns of Dobulu and Eki-Naryn were shown how to upload these changes on Open Street Map. Our goal was to show community members they could quickly make changes in the online maps of their towns with easy-to-learn tools. With an understanding of basic mapping, we turned our attention to learning about local-level adaptations that could improve existing policies.", 
       "camera": {
     		center:[76.2495,41.4897],
     		zoom:9.61,
@@ -334,8 +496,9 @@ var locations = [
     }		
     ,{
    		 "id":"4",
+   		 "image":"<img src=\'./images/board_game.jpg\' style=\'max-width:100%;max-height:100%;object-fit:contain;padding:10px\'>",
     	"title":"Storytelling with Web Maps",
-    	"description":"Using participatory mapping and open ended interviews, we talked with community members about how they worked with the environment. Our participants were school children to pensioners, national park officials to herders. Hover over the tab above to see the different rates of gender representation in our research participants, by location. The web atlas was used as a canvas to place photos and practices for each town. This offers a perspective of maps as not only showing physical places, but also landscapes of decisions, relationships, and local adaptations. Based on the practices our participants shared, we identified several ways in which traditional ways could support official government policy.",
+    	"description":"Using participatory mapping and open ended interviews, we spoke with community members about how they worked with their local environment. Our participants ranged from school children to pensioners, national park officials to herders. Hover over the tab to the right to see the different rates of gender representation in our research participants, by location. Each dot represents a person, and each line shows which group or association that person belongs to. Poor representation of any gender can lead to serious knowledge gaps about how an environment is used. <br><br><p>The web atlas was used as a canvas to place photos and practices for each town, to visualize different perspectives. Maps are important not only for showing physical places, but also for representing the landscapes of decisions, relationships, and local adaptations. For example, a young student may emphasize certain streets for the yearly festivals and activities that happen on them, while herders would view those same streets as routes of transport for their livestock. Based on the practices our participants shared, we identified several ways in which traditional ways could support official government policy.",
     	"camera": {
     		center:[76.2495,41.4897],
     		zoom:10,
@@ -344,8 +507,9 @@ var locations = [
     }
     ,{
        "id":"5",
+       "image":"<img src=\'./images/highpasture.jpg\' style=\'max-width:100%;max-height:100%;object-fit:contain;padding:10px\'>",
       "title":"High Pasture Migration Routes",
-      "description":"Herders tend to intensively use pastures near their villages because they are easier to reach, the roads to access these pastures are in better condition, and their yurts are more accessible to traders looking to buy milk products or to sell simple household goods such as soap. As a result, these pastures are often overgrazed. Interviewing elder herders, we mapped traditional routes across several remote pastures that have fallen into disrepair since Soviet times. Drawing on traditional knowledge helps demonstrate to the government ways to relieve pressure from overused nearby pastures: rebuild roads to make traditional remote pastures accessible.",
+      "description":"Herders tend to intensively use pastures near their villages because they are easier to reach, the roads to access these pastures are in better condition, and their yurts are more accessible to traders looking to buy milk products or to sell simple household goods such as soap. As a result, these pastures are often overgrazed. Interviewing elder herders, we mapped traditional routes across several remote pastures that have fallen into disrepair since Soviet times. Drawing on traditional knowledge can help demonstrate to the government ways to relieve pressure from overused nearby pastures. Our participants emphasized rebuilding roads to make traditional, remote pastures more accessible.",
       "camera": {
         center:[76.7752, 41.5044],
         zoom:9.42,
@@ -354,8 +518,9 @@ var locations = [
     }
     ,{
        "id":"6",
+       "image":"<img src=\'./images/monitoring.jpg\' style=\'max-width:100%;max-height:100%;object-fit:contain;display: block;margin: 0 auto;padding:10px\'>",
       "title":"Ecological Monitoring",
-      "description":"The Soviet Union used centrally determined dates for planting and harvesting. Since its collapse in 1991, Naryn residents have returned to traditional methods of forecasting the weather. With the effects of climate change making weather patterns more variable, traditional practices that are based on what people observe can help villagers determine the right time for them to start key livelihood activities. Use the slider above to see both locally-observed events and previously centrally controlled events, and consider how responsive each method is to the environment around it.",
+      "description":"The Soviet Union used centrally determined dates for planting and harvesting, to coordinate and take advantage of its massive infrastructure. Since its collapse in 1991, Naryn residents have returned to traditional methods of forecasting the weather. Naryn is infamous for being the coldest province in Kyrgyzstan, with some villages experiencing 5 months of winter. Interpreting signs such as the movement of wild animals or the position of the stars is a skill honed from years of experience, and gives the observer a low-tech way to predict times of frost or rain. Use the slider below to see both locally-observed events and previously government-controlled events.  <br><br>With the effects of climate change making weather patterns more variable, traditional practices that are based on what people observe can help villagers determine the right time for them to start key livelihood activities. Consider the benefits of accessible, low-tech methods against how generalizable and verifiable they are. There are also concerns with how well each method can adapt to large-scale changes in trends, caused by global phenomena such as climate change.",
       "camera": {
         center:[76.674, 41.616],
         zoom:7.58,
@@ -364,8 +529,9 @@ var locations = [
     }
     ,{
        "id":"7",
+       "image":"<img src=\'./images/medplants.jpg\' style=\'max-width:100%;max-height:100%;object-fit:contain;display: block;margin: 0 auto;padding:10px\'>",
       "title":"Cataloguing Medicinal Plants",
-      "description":"Many medicinal plants are encountered in the wild, but few among the younger generation know how to identify and store them properly. By interviewing elders and reviewing their collections, we have begun an online platform to list plants, the terrain they are found in, their distinguishing features, and what they treat. A public medicinal plant catalog can also help build dialogue between herders in the field and botanical experts in the capital of Bishkek. Our web atlas allows both sides to log on, add plants, and write recommendations or questions for each plant. The lines show the various groups connected through our catalog.",
+      "description":"Many medicinal plants are encountered in the wild, but few among the younger generation know how to identify and store them properly. By interviewing elders and reviewing their collections, we have begun an online platform to list plants, their traditional names, the terrain they are found in, their distinguishing features, and what they treat. A public medicinal plant catalog can also help build dialogue between herders in the field and botanical experts in the capital of Bishkek. Our web atlas allows both sides to log on, add plants, and write recommendations or questions for each plant. The lines show the various groups connected through our catalog.",
       "camera": {
         center:[75.827, 42.023],
         zoom:7.58,
@@ -374,7 +540,8 @@ var locations = [
     }
     ,{
        "id":"8",
-      "title":"A push towards SDG 17: A sustainable development knowledge platform",
+       "image":"<img src=\'./images/sdg17.png\' style=\'max-width:100%;max-height:100%;object-fit:contain;display: block;margin: 0 auto; \'>",
+      "title":"A push towards Sustainable Development Goal 17: A sustainable development knowledge platform",
       "description":"SDG 17 speaks to the need to rethink how development should be done. Rather than taking policies from developed countries and applying them to developing countries, SDG 17 pushes for an equal partnership and dialogue between both sides. A critical part of this is making open data available, and to acknowledge the validity of traditional knowledge. This project joins the growing community of open data efforts in Kyrgyzstan to present different perspectives and priorities on the ground. We aim to create a transparent space where policies that utilize local knowledge can be created. To learn more about this philosophy, click on 'About' in the top-right corner.",
       "camera": {
         center:[74.851, 41.91],
@@ -423,6 +590,7 @@ document.getElementById('fly').addEventListener('click', function() {
   
 });
 
+
 //function to filter eco_monitoring features by month
 function filterBy(month) {
 
@@ -434,13 +602,14 @@ function filterBy(month) {
 }
 //function to make the camera pan to the next slide    
 function playback(index) {
+    image.innerHTML = locations[index].image;
     title.textContent = locations[index].title;
-    description.textContent = locations[index].description;
+    description.innerHTML = locations[index].description;
     // Animate the map position based on camera properties
     map.flyTo(locations[index].camera);
 }
 // Toggle visible layers
-var toggleableLayerIds = [ 'Slope map', 'Provinces', 'Study Sites' ];
+var toggleableLayerIds = ['Slope map', 'Provinces', 'Study Sites'];
 
 for (var i = 0; i < toggleableLayerIds.length; i++) {
     var id = toggleableLayerIds[i];
@@ -460,9 +629,14 @@ for (var i = 0; i < toggleableLayerIds.length; i++) {
         if (visibility === 'visible') {
             map.setLayoutProperty(clickedLayer, 'visibility', 'none');
             this.className = '';
+            if (clickedLayer === toggleableLayerIds[0]){
+            legendbar.style.display="none";slope.style.display="none";}
         } else {
             this.className = 'active';
             map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+        	if (clickedLayer === toggleableLayerIds[0]){
+        	legendbar.style.display="block"; slope.style.display="block"}
+            
         }
     };
 
@@ -494,7 +668,7 @@ map.on('load', function() {
             "type": "symbol",
             "source": "eco_monitoring",
             "layout":{
-              "icon-image": "leaf-change",
+              "icon-image": eco_monitoring.properties.icon,
               "icon-size":0.03,   
               "visibility":"none",     
               "icon-allow-overlap":true
@@ -529,7 +703,7 @@ map.on('load', function() {
   });
   map.addSource('pasture_route', {
    "type": 'geojson',
-   'data': 'Geospatial Data/p2.geojson',
+   'data': 'Geospatial Data/pasture_route.geojson',
   });
   
    map.addSource("medplants", {
@@ -567,17 +741,6 @@ map.on('load', function() {
             'paint': {
               "raster-opacity": 0.5  
             }  
-        });
-    map.addLayer({
-            "id": "image",
-            "type": "raster",
-            "source": "image",
-            'paint': {
-              "raster-opacity": 0.7  
-            },
-            'layout': {
-              'visibility':'none'
-            }
         });
     map.addLayer({
             "id": "USSR-KG",
@@ -794,23 +957,161 @@ map.on('load', function() {
         popup.setLngLat(e.lngLat)
             .setHTML('<h3>'+ e.features[0].properties.Name + '</h3>' 
               + e.features[0].properties.description
-              + '<br> <img src="' + e.features[0].properties.image+ '" width="300"> <br>'
-              + e.features[0].properties.caption
+              + '<br> <object data="' + e.features[0].properties.image+ '" type ="image/jpg" width="300"></object> <br>'
+              + '<i>' + e.features[0].properties.caption + '</i>'
               )
             .addTo(map);
+            
     });
 
     //pop ups for KG Provinces
     map.on('click', 'Provinces', function(e) {
-        // Change the cursor style as a UI indicator.
         map.getCanvas().style.cursor = 'pointer';
         // Populate the line popup and set its coordinates based on the first coordinates of the line
         popup.setLngLat(e.lngLat)
             .setHTML('<h4>'+ e.features[0].properties.VARNAME_1 + ' ' + e.features[0].properties.ENGTYPE_1 + '</h4>' 
-              + 'Average 2016 earnings for agriculture, forestry, and fishing: ' + e.features[0].properties.wage_agric_forest_fish + ' Kyrgyz som'
-              + '<img src="' + e.features[0].properties.image +'">'
+              + '<b>Top eight livelihood activities (thousands employed, 2016)</b> <div id="chart"></div> <i>Click on each legend item\'s box to toggle it on or off.<br> Data courtesy of the National Statistical Committee of the Kyrgyz Republic (www.stat.kg)</i>'
             )
             .addTo(map);
+            //create pie charts
+         var pieindex = e.features[0].properties.url;
+         (function(d3) {
+        'use strict';
+
+        var width = 360;
+        var height = 360;
+        var radius = Math.min(width, height) / 2;
+        var donutWidth = 75;                            
+        var legendRectSize = 14;                                  
+        var legendSpacing = 4;       
+
+        var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        var svg = d3.select('#chart')
+          .append('svg')
+          .attr('width', width)
+          .attr('height', height)
+          .append('g')
+          .attr('transform', 'translate(' + (width / 2) + ',' + (height / 2) + ')');
+
+        var arc = d3.arc()
+          .innerRadius(radius - donutWidth)           
+          .outerRadius(radius);
+
+        var pie = d3.pie()
+          .value(function(d) { return d.count; })
+          .sort(null);
+
+        var tooltip = d3.select('#chart')                               // NEW
+          .append('div')                                                // NEW
+          .attr('class', 'tooltip');                                    // NEW
+
+        tooltip.append('div')                                           // NEW
+          .attr('class', 'label');                                      // NEW
+
+        tooltip.append('div')                                           // NEW
+          .attr('class', 'count');                                      // NEW
+
+        tooltip.append('div')                                           // NEW
+          .attr('class', 'percent');                                    // NEW
+
+        d3.csv(pieindex, function(error, dataset) {  // NEW
+        dataset.forEach(function(d) {                    
+         d.count = +d.count;                            
+         d.enabled = true;                               
+        });                                              
+
+        var path = svg.selectAll('path')
+          .data(pie(dataset))
+          .enter()
+          .append('path')
+          .attr('d', arc)
+          .attr('fill', function(d) {
+            return color(d.data.label);
+          })
+          .each(function(d) { this._current = d; });                // NEW
+
+        path.on('mouseover', function(d) {                            // NEW
+            var total = d3.sum(dataset.map(function(d) {                // NEW
+              return (d.enabled) ? d.count : 0;
+            }));                                                        // NEW
+            var percent = Math.round(1000 * d.data.count / total) / 10; // NEW
+            tooltip.select('.label').html(d.data.label);                // NEW
+            tooltip.select('.count').html(d.data.count + " thousand");                // NEW
+            tooltip.select('.percent').html(percent + '%');             // NEW
+            tooltip.style('display', 'block');                          // NEW
+          });                                                           // NEW
+
+          path.on('mouseout', function() {                              // NEW
+            tooltip.style('display', 'none');                           // NEW
+          });                                                           // NEW
+
+          
+          path.on('mousemove', function(d) {                            // NEW
+            tooltip.style('top', (d3.event.layerY + 10) + 'px')         // NEW
+              .style('left', (d3.event.layerX + 10) + 'px');            // NEW
+          });                                                           // NEW
+          
+
+        var legend = svg.selectAll('.legend')                     // NEW
+          .data(color.domain())                                   // NEW
+          .enter()                                                // NEW
+          .append('g')                                            // NEW
+          .attr('class', 'legend')                                // NEW
+          .attr('transform', function(d, i) {                     // NEW
+            var height = legendRectSize + legendSpacing;          // NEW
+            var offset =  height * color.domain().length / 2;     // NEW
+            var horz = -5 * legendRectSize;                       // NEW
+            var vert = i * height - offset;                       // NEW
+            return 'translate(' + horz + ',' + vert + ')';        // NEW
+          });                                                     // NEW
+
+        legend.append('rect')                                     // NEW
+          .attr('width', legendRectSize)                          // NEW
+          .attr('height', legendRectSize)                         // NEW
+          .style('fill', color)                                   // NEW
+          .style('stroke', color)                                // NEW
+          .on('click', function(label) {                            // NEW
+              var rect = d3.select(this);                             // NEW
+              var enabled = true;                                     // NEW
+              var totalEnabled = d3.sum(dataset.map(function(d) {     // NEW
+                return (d.enabled) ? 1 : 0;                           // NEW
+              }));                                                    // NEW
+
+              if (rect.attr('class') === 'disabled') {                // NEW
+                rect.attr('class', '');                               // NEW
+              } else {                                                // NEW
+                if (totalEnabled < 2) return;                         // NEW
+                rect.attr('class', 'disabled');                       // NEW
+                enabled = false;                                      // NEW
+              }                                                       // NEW
+
+              pie.value(function(d) {                                 // NEW
+                if (d.label === label) d.enabled = enabled;           // NEW
+                return (d.enabled) ? d.count : 0;                     // NEW
+              });                                                     // NEW
+
+              path = path.data(pie(dataset));                         // NEW
+
+              path.transition()                                       // NEW
+                .duration(750)                                        // NEW
+                .attrTween('d', function(d) {                         // NEW
+                  var interpolate = d3.interpolate(this._current, d); // NEW
+                  this._current = interpolate(0);                     // NEW
+                  return function(t) {                                // NEW
+                    return arc(interpolate(t));                       // NEW
+                  };                                                  // NEW
+                });                                                   // NEW
+            });                                                       // NEW
+
+        legend.append('text')                                     // NEW
+          .attr('x', legendRectSize + legendSpacing)              // NEW
+          .attr('y', legendRectSize - legendSpacing)              // NEW
+          .text(function(d) { return d; });                       // NEW
+        });                                                // NEW
+
+      })(window.d3)   
+ 
     });
     //pop ups for medplants
     map.on('click', 'medplants', function(e) {
@@ -836,7 +1137,7 @@ map.on('load', function() {
             )
             .addTo(map);
     });
-
+    
     //Pans the camera to the next or previous location on "locations" when the slidebutton is clicked
 	index = 0;
     document.getElementById('slidebutton').addEventListener('click', function(event) {
@@ -845,22 +1146,22 @@ map.on('load', function() {
             //reset migration tour buttons
             if (index!=4){
             holder =0;
-            document.getElementById("fly").innerHTML = "Begin migrating";
+            document.getElementById("fly").innerHTML = "Click here to follow a traditional route";
             fly.style.display="none";
             } else {
               fly.style.display="block";
             }
             //turns on or off the USSR layer depending on what slide you are currently viewing while pressing the forward-slide button
             tempvar = (index === 0) ? map.setLayoutProperty('USSR-KG', 'visibility','visible') : map.setLayoutProperty('USSR-KG', 'visibility','none');
-            tempvar2 = (index === 1) ? map.setLayoutProperty('image', 'visibility','visible')  : map.setLayoutProperty('image', 'visibility','none');
             tempvar3 = (index === 1) ? map.setLayoutProperty('Provinces', 'visibility','visible') : map.setLayoutProperty('Provinces', 'visibility','none');
             tempvar4 = (index === 2) ? map.setLayoutProperty('Study Sites', 'visibility','visible') : map.setLayoutProperty('Study Sites', 'visibility','none');
+            tempvar5 = (index === 3) ? slideout.style.display="block" : slideout.style.display="none";
             tempvar5 = (index === 5) ? map.setLayoutProperty('eco_monitoring', 'visibility','visible') : map.setLayoutProperty('eco_monitoring', 'visibility','none');
             tempvar7 = (index === 5) ? timeslider.style.display="block" : timeslider.style.display="none";
             tempvar6 = (index === 6) ? map.setLayoutProperty('medplants', 'visibility','visible') : map.setLayoutProperty('medplants', 'visibility','none');
             tempvar8 = (index === 6) ? map.setLayoutProperty('medplants_links', 'visibility','visible') : map.setLayoutProperty('medplants_links', 'visibility','none');
             tempvar9 = (index === 4) ? map.setLayoutProperty('pasture_route', 'visibility','visible') : map.setLayoutProperty('pasture_route', 'visibility','none');
-            
+            document.getElementById('pageindex').textContent = locations[index].id + "/" + locations.length;
 
     });
     document.getElementById('backbutton').addEventListener('click', function(event) {
@@ -869,22 +1170,24 @@ map.on('load', function() {
             //reset migration tour buttons
             if (index!=4){
               holder =0;
-              document.getElementById("fly").innerHTML = "Begin migrating";
+              document.getElementById("fly").innerHTML = "Click here to follow a traditional route";
               fly.style.display="none";
             } else {
               fly.style.display="block";
             }
             //turns on or off the buffer layer depending on what slide you are currently viewing while pressing the back-slide button
             tempvar = (index === 0) ? map.setLayoutProperty('USSR-KG', 'visibility','visible') : map.setLayoutProperty('USSR-KG', 'visibility','none');
-            tempvar2 = (index === 1) ? map.setLayoutProperty('image', 'visibility','visible') : map.setLayoutProperty('image', 'visibility','none');
             tempvar3 = (index === 1) ? map.setLayoutProperty('Provinces', 'visibility','visible') : map.setLayoutProperty('Provinces', 'visibility','none');
             tempvar4 = (index === 2) ? map.setLayoutProperty('Study Sites', 'visibility','visible') : map.setLayoutProperty('Study Sites', 'visibility','none');
+            tempvar5 = (index === 3) ? slideout.style.display="block" : slideout.style.display="none";
             tempvar5 = (index === 5) ? map.setLayoutProperty('eco_monitoring', 'visibility','visible') : map.setLayoutProperty('eco_monitoring', 'visibility','none');
             tempvar7 = (index === 5) ? timeslider.style.display="block" : timeslider.style.display="none";
             tempvar6 = (index === 6) ? map.setLayoutProperty('medplants', 'visibility','visible') : map.setLayoutProperty('medplants', 'visibility','none');
             tempvar8 = (index === 6) ? map.setLayoutProperty('medplants_links', 'visibility','visible') : map.setLayoutProperty('medplants_links', 'visibility','none');
             tempvar9 = (index === 4) ? map.setLayoutProperty('pasture_route', 'visibility','visible') : map.setLayoutProperty('pasture_route', 'visibility','none');
+            document.getElementById('pageindex').textContent = locations[index].id + "/" + locations.length;
     });
+
     // Start the playback animation for the prepared slides
     playback(index);
 });
