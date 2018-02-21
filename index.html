@@ -1209,7 +1209,7 @@ map.on('load', function() {
                
             )
             .addTo(map);
-            map.flyTo({center: [e.features[0].geometry.coordinates[0]-0.2,e.features[0].geometry.coordinates[1]-0.2]});
+            map.flyTo({center: [e.features[0].geometry.coordinates[0],e.features[0].geometry.coordinates[1]]});
     });
     //pop ups for timeslider eco monitoring
     map.on('click', 'eco_monitoring', function(e) {
@@ -1221,7 +1221,7 @@ map.on('load', function() {
               e.features[0].properties.description
             )
             .addTo(map);
-            map.flyTo({center: [e.features[0].geometry.coordinates[0]-0.2,e.features[0].geometry.coordinates[1]-0.2]});
+            map.flyTo({center: [e.features[0].geometry.coordinates[0],e.features[0].geometry.coordinates[1]]});
     });
     
     //Pans the camera to the next or previous location on "locations" when the slidebutton is clicked
