@@ -696,14 +696,14 @@ map.on('load', function() {
             "type": "symbol",
             "source": "eco_monitoring",
             "layout":{
-              "icon-image": ["get", "icon"],//"townevent.png",
+              "icon-image": ["get", "icon"],
               "icon-size":0.1,   
               "visibility":"none",     
               "icon-allow-overlap":true
             }  
           });
-        // Set time slider filter to first month of the year
-        // 0 = January
+        // Set time slider filter to first season
+        // 0 = Winter
         filterBy(0);
         document.getElementById('slider').addEventListener('input', function(e) {
             var month = parseInt(e.target.value, 10);
